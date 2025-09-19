@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mario e Paulo ❤️</title>
+<style>
+:root{--bg:#0f1724;--card:#0b1220;--accent:#ff6b81;--glass: rgba(255,255,255,0.04)}
+*{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial}
+body{margin:0;min-height:100vh;background:linear-gradient(180deg,#071023 0%, #0b1020 100%);color:#e6eef8;display:flex;align-items:center;justify-content:center;padding:24px;overflow:hidden}
+.wrap{position:relative;z-index:1;width:980px;max-width:98%;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:14px;padding:18px;box-shadow:0 8px 30px rgba(2,6,23,0.6)}
+header{display:flex;align-items:center;gap:16px}
+.logo{width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#7b61ff);display:flex;align-items:center;justify-content:center;font-weight:700}
+h1{margin:0;font-size:20px}
+.grid{display:grid;grid-template-columns:1fr 360px;gap:18px;margin-top:14px}
+.card{background:var(--card);padding:14px;border-radius:10px;box-shadow:inset 0 -1px 0 rgba(255,255,255,0.02)}
+.counter{font-size:28px;font-weight:600;text-align:center;padding:12px}
+.since{font-size:13px;color:#bcd2f0;text-align:center}
+.photos{position:relative;width:100%;height:500px;overflow:hidden;border-radius:10px}
+.photos img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 0.5s}
+.photos img.active{opacity:1}
+.editor{min-height:120px;padding:10px;border-radius:8px;background:var(--glass);margin-top:8px;white-space:pre-line}
+.hint{font-size:12px;color:#9fb7e6;margin-top:8px}
+button{padding:6px 10px;border:none;border-radius:6px;background:var(--accent);color:#fff;cursor:pointer;font-size:12px}
+button:hover{opacity:0.8}
+#passwordPrompt{position:fixed;top:0;left:0;width:100%;height:100%;background:#0f1724;display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:999}
+#passwordPrompt input{padding:8px 10px;font-size:16px;margin-top:12px;border-radius:6px;border:none}
+#passwordPrompt button{margin-top:10px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.hearts{position:fixed;top:0;left:0;width:100%;height:100%;overflow:hidden;z-index:0;pointer-events:none}
+.hearts span{position:absolute;display:block;color:rgba(255,107,129,0.3);font-size:24px;animation:float 10s linear infinite}
+@keyframes float{0%{transform:translateY(100vh) scale(0.5) rotate(0deg);opacity:1;}100%{transform:translateY(-10vh) scale(1.2) rotate(360deg);opacity:0;}}
+</style>
+</head>
+<body>
+<div id="passwordPrompt">
+  <div style="color:#fff;font-size:20px;">Digite a senha para acessar 🔐</div>
+  <input type="password" id="pwdInput" placeholder="Senha">
+  <button id="pwdBtn">Entrar</button>
+</div>
+
+<div class="hearts" id="hearts"></div>
+<div class="wrap" style="display:none;">
+  <header>
+    <div class="logo">❤</div>
+    <div>
+      <h1>Mario e Paulo ❤️</h1>
+      <div style="color:#9fb7e6;font-size:13px">Nosso contador, fotos, mensagens e música — tudo local e privado.</div>
+    </div>
+  </header>
+
+  <div id="main" class="grid">
+    <!-- Coluna esquerda -->
+    <div>
+      <div class="card">
+        <div>
+          <div style="font-size:13px;color:#cfe3ff">Tempo juntos</div>
+          <div class="since" id="sinceText">Desde: 25/02/2024</div>
+        </div>
+        <div class="counter" id="counter">-- anos, -- meses, -- dias<br>--:--:--</div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <div style="font-size:13px;color:#cfe3ff">Música</div>
+        <audio id="player" controls autoplay style="width:100%"></audio>
+        <button id="nextTrack" style="margin-top:8px;width:100%">⏭️ Avançar música</button>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <div style="font-size:13px;color:#cfe3ff">Mensagens & Notas</div>
+        <div id="note" class="editor" style="user-select:none;">
+Olá minha Pérola Embranquecida pelo mar da Odisséia,
+Poderia te contar o que seria amor para mim, mas ter você já é sinônimo disso. Obrigado por ser meu porto.
+Aprendi com você que amor não é apenas sentimento, mas sim o cotidiano do querer realizar, do sonhar, do conquistar...
+Aprendi que a decisão de querer fazer acontecer mesmo quando os dias parecem difíceis; é construir uma relação sem orgulho e sem vergonha de pedir desculpas quando necessário, e com a vontade de ir juntos construindo um caminho até o fim.  
+Amar você é ter o desejo de ficar, ouvir, cuidar e ter a certeza de que esse amor é algo por qual vale a pena lutar diariamente. 
+Eu amo você!
+        </div>
+      </div>
+    </div>
+
+    <!-- Coluna direita -->
+    <aside>
+      <div class="card">
+        <div style="font-size:13px;color:#cfe3ff">Fotos</div>
+        <div class="photos" id="photos"></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+(() => {
+  const PASSWORD = "mp250224";
+  const wrap = document.querySelector(".wrap");
+  const pwdPrompt = document.getElementById("passwordPrompt");
+  const pwdInput = document.getElementById("pwdInput");
+  const pwdBtn = document.getElementById("pwdBtn");
+
+  pwdBtn.addEventListener("click", ()=>{
+    if(pwdInput.value === PASSWORD){
+      pwdPrompt.style.display="none";
+      wrap.style.display="block";
+    } else {
+      alert("Senha incorreta!");
+      pwdInput.value="";
+    }
+  });
+  pwdInput.addEventListener("keyup", (e)=>{ if(e.key==="Enter") pwdBtn.click(); });
+
+  // Contador
+  const startDate = new Date('2024-02-25T00:00:00');
+  const counterEl = document.getElementById('counter');
+  function calcSince(start){
+    const now=new Date();
+    let y=now.getFullYear()-start.getFullYear();
+    let m=now.getMonth()-start.getMonth();
+    let d=now.getDate()-start.getDate();
+    if(d<0){ m-=1; const prevMonth=new Date(now.getFullYear(), now.getMonth(), 0); d+=prevMonth.getDate();}
+    if(m<0){ y-=1; m+=12;}
+    return {y,m,d,hours:now.getHours(),mins:now.getMinutes(),secs:now.getSeconds()};
+  }
+  function updateCounter(){
+    const diff = calcSince(startDate);
+    counterEl.innerHTML=`${diff.y} anos, ${diff.m} meses, ${diff.d} dias<br>${String(diff.hours).padStart(2,'0')}:${String(diff.mins).padStart(2,'0')}:${String(diff.secs).padStart(2,'0')}`;
+  }
+  setInterval(updateCounter,1000);
+  updateCounter();
+
+  // Fotos fixas do Tumblr
+  const photos=document.getElementById('photos');
+  const tumblrPhotos = [
+    "https://64.media.tumblr.com/94423210224fdf5b7148a88afebea09a/6251da9e0d1aaa02-9c/s2048x3072/a14503f0274fea2c4bffb919c4502c0e959f97e7.jpg",
+    "https://64.media.tumblr.com/0a4c64fe9d109e26d1996d9abecfdfad/6251da9e0d1aaa02-45/s2048x3072/d31cd1e6d55dd0c5bbc1cfda75765e49e950585f.jpg",
+    "https://64.media.tumblr.com/929156848d6c74985706b2bd0d5199ca/6251da9e0d1aaa02-9e/s2048x3072/711c72e93407502dd99a51eb1013e2f6cf212c88.jpg",
+    "https://64.media.tumblr.com/d21850b3829303b461303420891176d4/6251da9e0d1aaa02-16/s2048x3072/7a0c777a87757585e40d07a39b274b37e23b6807.jpg",
+    "https://64.media.tumblr.com/36a6ef4acd5682024784fabc06f513b1/6251da9e0d1aaa02-6d/s1280x1920/9d604439e0f0ba2f0ef6be0b46cbf633a41da397.jpg",
+    "https://64.media.tumblr.com/3ba8e4aa957fb1f7e39fda7521e8af5c/6251da9e0d1aaa02-71/s1280x1920/9394bd0d53f652f6831206aea2b6bc993c96937b.jpg",
+    "https://64.media.tumblr.com/1b02df5026c831988bfde47b01f8b300/6251da9e0d1aaa02-65/s1280x1920/827c9b321ac3df04894797d86a063a1f62b8a680.jpg",
+    "https://64.media.tumblr.com/81242c2f683d3579ec4eeabbe12d2fb1/6251da9e0d1aaa02-97/s1280x1920/bf34a95c5773e3ffc33bad928914142dc049bc49.jpg",
+    "https://64.media.tumblr.com/7893905b436b27c53a969026646b6727/6251da9e0d1aaa02-6c/s1280x1920/d2c5af3110a52cf3ed37f47c7f7a503020aa9a33.jpg",
+    "https://64.media.tumblr.com/f9cc0add3c832615969dfc3bcf0350a3/6251da9e0d1aaa02-10/s1280x1920/594fd3cfb57cf2eb5cf4a4e9aabf51c9a6e00928.jpg",
+    "https://64.media.tumblr.com/d8d5cf2d5e575346f21497d4d8c8a65f/6251da9e0d1aaa02-15/s2048x3072/c6ca9a42bf7c02243c02cc4b7037f757da949c96.jpg",
+    "https://64.media.tumblr.com/096748792a1239577560af5f23b9ebef/6251da9e0d1aaa02-e2/s2048x3072/12b5ddf5c80b672b219cc06179dd3499293b79f6.jpg",
+    "https://64.media.tumblr.com/92d2c448b2fb4f066b86896a071530f2/6251da9e0d1aaa02-64/s1280x1920/d24e9dc5c8c2f91d3679937c15f2916c52fc766b.webp"
+  ];
+  function addPhoto(url){ const img=document.createElement('img'); img.src=url; photos.appendChild(img); }
+  tumblrPhotos.forEach(url => addPhoto(url));
+
+  // Slideshow fotos
+  let slideIndex=0;
+  function showSlides(){
+    const imgs=photos.querySelectorAll('img');
+    imgs.forEach(i=>i.classList.remove('active'));
+    if(imgs.length>0){ slideIndex=(slideIndex+1)%imgs.length; imgs[slideIndex].classList.add('active'); }
+  }
+  setInterval(showSlides,2000);
+
+  // Música
+  const player = document.getElementById('player');
+  const playlist = [
+      "https://64.media.tumblr.com/13ed83188e4841b41282f8c88983356a/4159927fce0bed2b-88/b6b49cb2ca35a664fcd847ad96dba64b639f8b4b.mp3",
+  "https://64.media.tumblr.com/e54fc4e4431ac52d63f59ca6d0f2b2cb/979412906e7d005d-d2/c3885c6312e17878fdd5b0cd9c1bbbd475cb7e7c.mp3",
+  "https://64.media.tumblr.com/af796368ef5268cfc4788d25e87081bf/4ca32d271f58615c-6a/63a4d6478fca4d7ba5b896a91a8bbda604af7038.mp3",
+  "https://64.media.tumblr.com/9b881aee7ed89a500ce9140ef9509355/35d0f9ae0734e54a-07/c58f161ef24545786b1792d6cc545c0c1c7840b1.mp3",
+  "https://64.media.tumblr.com/3aae51845fecb888afa21f852be90908/f371cf0ba8425311-49/f65cd92315c9d01824825f0b2164ee1d31df713d.mp3",
+  "https://64.media.tumblr.com/2bba9d1cc85c3994c18ed651c2c56633/0ab35514af00a5ae-ac/e9f9c5d7fa50bbe7a01023b275b905388a1f50d5.mp3"
+  ];
+  let current = 0;
+  function playTrack(idx){ if(idx >= playlist.length) idx = 0; player.src = playlist[idx]; player.play().catch(()=>{}); current = idx; }
+  player.addEventListener('ended', ()=>{ playTrack((current+1) % playlist.length); });
+  document.getElementById("nextTrack").addEventListener("click", ()=>{ playTrack((current+1) % playlist.length); });
+  playTrack(0);
+
+  // Corações
+  const heartsContainer=document.getElementById('hearts');
+  function createHeart(){ const span=document.createElement('span'); span.innerHTML='❤'; span.style.left=Math.random()*100+'vw'; span.style.fontSize=(16+Math.random()*24)+'px'; span.style.animationDuration=(5+Math.random()*10)+'s'; heartsContainer.appendChild(span); setTimeout(()=>span.remove(),15000); }
+  setInterval(createHeart,500);
+})();
+</script>
+</body>
+</html>
